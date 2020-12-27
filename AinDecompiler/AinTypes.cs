@@ -226,6 +226,11 @@ namespace AinDecompiler
         public SwitchBlockCollection() : base() { }
         public SwitchBlockCollection(IEnumerable<SwitchBlock> sequence) : base(sequence) { }
     }
+    public class SLBLCollection : MyCollection<SLBLType>
+    {
+        public SLBLCollection() : base() { }
+        public SLBLCollection(IEnumerable<SLBLType> sequence) : base(sequence) { }
+    }
 
 
 
@@ -2117,7 +2122,7 @@ namespace AinDecompiler
         {
             Address = br.ReadInt32();
             Name = br.ReadStringNullTerminated();
-            if (version > 0 && version < 7)
+            if (version > 1 && version < 7)
             {
                 IsLabel = br.ReadInt32();
             }
@@ -2125,7 +2130,7 @@ namespace AinDecompiler
             StructType = br.ReadInt32();
             ParameterCount = br.ReadInt32();
             int totalVariables = br.ReadInt32();
-            if (version > 0)
+            if (version > 1)
             {
                 Crc = br.ReadInt32();
             }
@@ -2143,7 +2148,7 @@ namespace AinDecompiler
         {
             bw.Write(Address);
             bw.WriteStringNullTerminated(Name);
-            if (version > 0 && version < 7)
+            if (version > 1 && version < 7)
             {
                 bw.Write(IsLabel);
             }
@@ -2151,7 +2156,7 @@ namespace AinDecompiler
             bw.Write(StructType);
             bw.Write(ParameterCount);
             bw.Write(Parameters.Count);
-            if (version > 0)
+            if (version > 1)
             {
                 bw.Write(Crc);
             }
@@ -3274,6 +3279,180 @@ namespace AinDecompiler
             var clone = (GlobalInitialValue)this.MemberwiseClone();
             return clone;
         }
+
+        #region IWithRoot<AinFile> Members
+
+        AinFile IWithRoot<AinFile>.Root
+        {
+            get
+            {
+                return this.Root;
+            }
+            set
+            {
+                this.Root = value;
+            }
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// An SLBL variable, which consists of a string and an int. I don't know what they
+    /// are yet.
+    /// </summary>
+    [TypeConverter(typeof(MyTypeConverter))]
+    public class SLBLType : IReadable, IWithIndex, IWithParent<IFunction>, IWithRoot<AinFile>
+    {
+        /// <summary>
+        /// The string object half of the tuple.
+        /// </summary>
+        public string StrObj;
+        /// <summary>
+        /// The int half of the tuple.
+        /// </summary>
+        public int IntObj = -1;
+
+
+        /// <summary>
+        /// The array index of the variable
+        /// </summary>
+        [Browsable(false)]
+        public int Index = -1;
+        /// <summary>
+        /// The function or struct that contains this whatever-it-s
+        /// </summary>
+        [Browsable(false)]
+        public IFunction Parent;
+        /// <summary>
+        /// The AIN file
+        /// </summary>
+        [Browsable(false)]
+        public AinFile Root;
+
+
+
+        /// <summary>
+        /// Returns a copy of the variable.
+        /// </summary>
+        /// <returns>A copy of the variable.</returns>
+        public Variable Clone()
+        {
+            var clone = (Variable)this.MemberwiseClone();
+            clone.Parent = null;
+            clone.Root = null;
+            return clone;
+        }
+
+        /// <summary>
+        /// Reads the variable from a binary reader
+        /// </summary>
+        /// <param name="br">The binary reader to read from</param>
+        public void Read(BinaryReader br)
+        {
+            StrObj = br.ReadStringNullTerminated();
+            IntObj = br.ReadInt32();
+        }
+
+        /// <summary>
+        /// Writes the variaible to a binary writer
+        /// </summary>
+        /// <param name="bw">The binary writer to write to</param>
+        public void Write(BinaryWriter bw)
+        {
+            bw.WriteStringNullTerminated(StrObj);
+            bw.Write(IntObj);
+        }
+
+        /// <summary>
+        /// Returns the declaration string of a variable (typeName variableName)
+        /// </summary>
+        /// <returns>The declration string of a variable</returns>
+        public override string ToString()
+        {
+            if (Root == null)
+            {
+                return ReflectionUtil.ToString(this);
+            }
+            return "SLBL: " + this.StrObj + " " + this.IntObj;
+        }
+
+        /*#region ISLBL Members
+
+        string IVariable.StrObj
+        {
+            get
+            {
+                return this.StrObj;
+            }
+            set
+            {
+                this.StrObj = value;
+            }
+        }
+
+        int IVariable.IntObj
+        {
+            get
+            {
+                return this.IntObj;
+            }
+            set
+            {
+                this.IntObj = value;
+            }
+        }
+
+        #endregion*/
+
+
+        #region IWithIndex Members
+
+        int IWithIndex.Index
+        {
+            get
+            {
+                return this.Index;
+            }
+            set
+            {
+                this.Index = value;
+            }
+        }
+
+        #endregion
+
+        #region IWithParent Members
+
+        object IWithParent.Parent
+        {
+            get
+            {
+                return this.Parent;
+            }
+            set
+            {
+                this.Parent = (IFunction)value;
+            }
+        }
+
+        #endregion
+
+        #region IWithParent<IFunction> Members
+
+        IFunction IWithParent<IFunction>.Parent
+        {
+            get
+            {
+                return this.Parent;
+            }
+            set
+            {
+                this.Parent = value;
+            }
+        }
+
+        #endregion
 
         #region IWithRoot<AinFile> Members
 

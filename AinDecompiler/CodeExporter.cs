@@ -177,6 +177,11 @@ namespace AinDecompiler
 
                                 int functionNumber = functionNode.id;
                                 var function = ainFile.GetFunction(functionNumber);
+
+                                if(function.ToString().Contains("SP_SET_CG_REAL")) {
+                                    Console.WriteLine("SP_SET_CG_REAL");
+                                }
+
                                 if (!VisitedFunctions.Contains(functionNumber))
                                 {
                                     VisitedFunctions.Add(functionNumber);

@@ -1099,7 +1099,7 @@ namespace AinDecompiler
                         {
                             Expression intValue = null;
                             Expression valueToAssign, assignToThis;
-                            if (ainFile.Version > 0)
+                            if (ainFile.Version > 1)
                             {
                                 intValue = stack.Pop();
                             }
@@ -1108,7 +1108,7 @@ namespace AinDecompiler
 
                             //var assignmentRef = new Expression(Instruction.StructAssignmentRef, currentAddress, assignToThis, intValue);
 
-                            if (ainFile.Version > 0)
+                            if (ainFile.Version > 1)
                             {
                                 stack.Push(new Expression(instruction, currentAddress, assignToThis, valueToAssign, intValue));
                             }

@@ -96,6 +96,11 @@ namespace AinDecompiler
         /// </summary>
         public int GameVersion;       //GVER
         /// <summary>
+        /// Variables consisting of a string and an int, which seem to exist only in
+        /// AIN Version 1, aka Mamanyonyo. I have no fucking clue what they're for.
+        public SLBLCollection SLBLs = new SLBLCollection();
+        /// </summary>
+        /// <summary>
         /// The ID number for the onjump function, called when using the jump statement
         /// </summary>
         public int OJMP;              //OJMP
@@ -140,6 +145,11 @@ namespace AinDecompiler
 
         public readonly static FunctionCollection BuiltInFunctions = new FunctionCollection(CreateBuiltInFunctions());
         public readonly static Dictionary<string, Function> BuiltInFunctionsInverse = BuiltInFunctions.ToDictionary(f => f.Name);
+
+
+        
+
+
 
         /// <summary>
         /// Whether or not this AIN file is an "old version" seen in games like Daibanchou.
@@ -1098,6 +1108,11 @@ namespace AinDecompiler
                 case "GVER":
                     GameVersion = br.ReadInt32();
                     break;
+                case "SLBL":
+                    length = br.ReadInt32();
+                    SLBLs.Clear();
+                    SLBLs.AddRange(Util.Read<SLBLType>(br, length));
+                    break;
                 case "STR0":
                     length = br.ReadInt32();
                     Strings.Clear();
@@ -1251,6 +1266,12 @@ namespace AinDecompiler
                 case "GVER":
                     bw.Write(GameVersion);
                     break;
+                /*case "SLBL":
+                    // Doesn't currently work, as the SLBL list will always be
+                    // empty at this stage.
+                    bw.Write(SLBLs.Count);
+                    Util.Write(bw, SLBLs);
+                    break;*/
                 case "STR0":
                     bw.Write(Strings.Count);
                     Util.WriteStrings(bw, Strings);
@@ -1480,6 +1501,7 @@ namespace AinDecompiler
             ApplyIndexesAndParents(this.Structs);
             ApplyIndexesAndParents(this.Switches);
             ApplyIndexesAndParents(this.Delegates);
+            ApplyIndexesAndParents(this.SLBLs);
             foreach (var switchBlock in this.Switches)
             {
                 ApplyIndexesAndParents(switchBlock.SwitchCases);

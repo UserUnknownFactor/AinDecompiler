@@ -748,7 +748,7 @@ namespace AinDecompiler.Compiler
             {
                 row = tokenExpression.Row;
                 column = tokenExpression.Column;
-                fileName = tokenExpression.fileName;
+                fileName = tokenExpression.FileName;
                 errorMessage = "Line " + (row + 1).ToString() + ", column " + (column + 1).ToString() + ": " + errorMessage;
             }
             else
@@ -777,6 +777,7 @@ namespace AinDecompiler.Compiler
                 lastErrorFunctionName = functionName;
                 Error(this, new ErrorEventArgs(new Exception(errorMessage)));
             }
+            Debug.WriteLine(errorMessage + "\n\t" + tokenExpression.FileName + " @" + tokenExpression.row);
             Errors.Add(errorMessage);
 
 
